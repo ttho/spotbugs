@@ -532,7 +532,6 @@ public class FindBugs2 implements IFindBugsEngine, AutoCloseable {
                 if (factory != null) {
                     factory.setPriorityAdjustment(adjustmentAmount);
                 } else {
-                    //
                     DetectorFactoryCollection i18n = DetectorFactoryCollection.instance();
                     BugPattern pattern = i18n.lookupBugPattern(adjustmentTarget);
                     if (pattern == null) {
