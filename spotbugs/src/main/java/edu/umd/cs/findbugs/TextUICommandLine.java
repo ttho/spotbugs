@@ -212,7 +212,7 @@ public class TextUICommandLine extends FindBugsCommandLine {
         addOption("-chooseVisitors", "+v1,-v2,...", "selectively enable/disable detectors");
         addOption("-choosePlugins", "+p1,-p2,...", "selectively enable/disable plugins");
         addOption("-adjustPriority", "v1=(raise|lower|suppress)[,...]",
-                "raise/lower priority of warnings for given visitor(s), or suppress them completely");
+                "raise/lower priority of warnings for given detectors (simple or fully qualified class names) or bug patterns, or suppress them completely");
 
         startOptionGroup("Project configuration options:");
         addOption("-auxclasspath", "classpath", "set aux classpath for analysis");
@@ -264,7 +264,7 @@ public class TextUICommandLine extends FindBugsCommandLine {
 
     Map<String, String> parsedOptions = new LinkedHashMap<>();
 
-    private List<TextUIBugReporter> reporters = new ArrayList<>();
+    private final List<TextUIBugReporter> reporters = new ArrayList<>();
 
     /**
      * Parse {@code optionExtraPart} and configure {@Link TextUIBugReporter} if it contains the
@@ -563,7 +563,10 @@ public class TextUICommandLine extends FindBugsCommandLine {
                     throw new IllegalArgumentException("Illegal priority adjustment value: " + adjustment);
                 }
 
-                DetectorFactory factory = DetectorFactoryCollection.instance().getFactory(adjustmentTarget);
+                DetectorFactory factory = DetectorFactoryCollection.instance().getFactoryByClassName(adjustmentTarget);
+                if (factory == null) {
+                    factory = DetectorFactoryCollection.instance().getFactory(adjustmentTarget);
+                }
                 if (factory != null) {
                     factory.setPriorityAdjustment(adjustmentAmount);
                 } else {
@@ -571,7 +574,7 @@ public class TextUICommandLine extends FindBugsCommandLine {
                     DetectorFactoryCollection i18n = DetectorFactoryCollection.instance();
                     BugPattern pattern = i18n.lookupBugPattern(adjustmentTarget);
                     if (pattern == null) {
-                        throw new IllegalArgumentException("Unknown detector: " + adjustmentTarget);
+                        throw new IllegalArgumentException("Unknown detector or bug pattern: " + adjustmentTarget);
                     }
                     pattern.adjustPriority(adjustmentAmount);
                 }

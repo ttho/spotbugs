@@ -525,7 +525,10 @@ public class FindBugs2 implements IFindBugsEngine, AutoCloseable {
                     throw new IllegalArgumentException("Illegal priority adjustment value: " + adjustment);
                 }
 
-                DetectorFactory factory = DetectorFactoryCollection.instance().getFactory(adjustmentTarget);
+                DetectorFactory factory = DetectorFactoryCollection.instance().getFactoryByClassName(adjustmentTarget);
+                if (factory == null) {
+                    factory = DetectorFactoryCollection.instance().getFactory(adjustmentTarget);
+                }
                 if (factory != null) {
                     factory.setPriorityAdjustment(adjustmentAmount);
                 } else {
@@ -533,12 +536,22 @@ public class FindBugs2 implements IFindBugsEngine, AutoCloseable {
                     DetectorFactoryCollection i18n = DetectorFactoryCollection.instance();
                     BugPattern pattern = i18n.lookupBugPattern(adjustmentTarget);
                     if (pattern == null) {
-                        throw new IllegalArgumentException("Unknown detector: " + adjustmentTarget);
+                        throw new IllegalArgumentException("Unknown detector or bug pattern: " + adjustmentTarget);
                     }
                     pattern.adjustPriority(adjustmentAmount);
                 }
             }
         }
+    }
+
+    /**
+     * Resets priority adjustments on all detectors and bug patterns.
+     */
+    public static void resetPriorityAdjustments() {
+        DetectorFactoryCollection.instance().factoryIterator().forEachRemaining(f -> {
+            f.setPriorityAdjustment(0);
+            f.getReportedBugPatterns().forEach(bp -> bp.setPriorityAdjustment(0));
+        });
     }
 
     protected void configureFilters(UserPreferences userPreferences) {
