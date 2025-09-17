@@ -329,9 +329,9 @@ public class UserPreferences implements Cloneable {
         writeProperties(props, KEY_EXCLUDE_FILTER, excludeFilterFiles);
         writeProperties(props, KEY_EXCLUDE_BUGS, excludeBugsFiles);
         writeProperties(props, KEY_PLUGIN, customPlugins);
-        props.put(KEY_ADJUST_PRIORITY, adjustPriority.entrySet() //
-                .stream() //
-                .map(entry -> entry.getKey() + "=" + entry.getValue()) //
+        props.put(KEY_ADJUST_PRIORITY, adjustPriority.entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .collect(Collectors.joining(",")));
         try (OutputStream prefStream = new BufferedOutputStream(out)) {
             props.store(prefStream, "SpotBugs User Preferences");

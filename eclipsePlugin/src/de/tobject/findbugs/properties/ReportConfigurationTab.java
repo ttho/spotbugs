@@ -445,9 +445,9 @@ public class ReportConfigurationTab extends Composite {
     }
 
     private void updateAdjustPriorityText(Map<String, String> adjustPriorityMap) {
-        adjustPriorityText.setText(adjustPriorityMap.entrySet() //
-                .stream() //
-                .map(entry -> entry.getKey() + "=" + entry.getValue()) //
+        adjustPriorityText.setText(adjustPriorityMap.entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .collect(Collectors.joining("\n")));
     }
 
