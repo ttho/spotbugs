@@ -9,6 +9,7 @@ Currently the versioning policy of this project follows [Semantic Versioning v2.
 ### Fixed
 - Fix for missing -adjustPriority parameter in Eclipse preferences ([#3687](https://github.com/spotbugs/spotbugs/issues/3687))
 - Documentation of -adjustPriority parameter
+
 ### Changed
 - Support for fully qualified class names for detectors in -adjustPriority parameter
 
