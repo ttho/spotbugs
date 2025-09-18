@@ -263,19 +263,32 @@ public class UserPreferences implements Cloneable {
         customPlugins = readProperties(props, KEY_PLUGIN);
         mergeSimilarWarnings = Boolean.parseBoolean(props.getProperty(KEY_MERGE_SIMILAR_WARNINGS));
         if (props.get(KEY_ADJUST_PRIORITY) != null) {
-            StringTokenizer tokenizer = new StringTokenizer(props.getProperty(KEY_ADJUST_PRIORITY), ",");
-            while (tokenizer.hasMoreElements()) {
-                String token = tokenizer.nextToken();
-                int equalPos = token.indexOf('=');
-                if (equalPos > 0) {
-                    String key = token.substring(0, equalPos).trim();
-                    String value = token.substring(equalPos + 1).trim();
-                    if (!key.isEmpty() && !value.isEmpty()) {
-                        adjustPriority.put(key, value);
-                    }
+            adjustPriority.putAll(parseAdjustPriorities(props.getProperty(KEY_ADJUST_PRIORITY)));
+        }
+    }
+
+    /**
+     * Parses the -adjustPriority parameter into a map: detector / bug pattern -> priority change
+     *
+     * @param str
+     *            the string to parse
+     * @return the parsed map
+     */
+    public static Map<String, String> parseAdjustPriorities(String str) {
+        Map<String, String> retVal = new HashMap<>();
+        StringTokenizer tokenizer = new StringTokenizer(str, ",");
+        while (tokenizer.hasMoreElements()) {
+            String token = tokenizer.nextToken();
+            int equalPos = token.indexOf('=');
+            if (equalPos > 0) {
+                String key = token.substring(0, equalPos).trim();
+                String value = token.substring(equalPos + 1).trim();
+                if (!key.isEmpty() && !value.isEmpty()) {
+                    retVal.put(key, value);
                 }
             }
         }
+        return retVal;
     }
 
     /**

@@ -540,46 +540,8 @@ public class TextUICommandLine extends FindBugsCommandLine {
         } else if ("-adjustPriority".equals(option)) {
             // Selectively raise or lower the priority of warnings
             // produced by specified detectors.
-
-            StringTokenizer tok = new StringTokenizer(argument, ",");
-            while (tok.hasMoreTokens()) {
-                String token = tok.nextToken();
-                int eq = token.indexOf('=');
-                if (eq < 0) {
-                    throw new IllegalArgumentException("Illegal priority adjustment: " + token);
-                }
-
-                String adjustmentTarget = token.substring(0, eq);
-                String adjustment = token.substring(eq + 1);
-
-                int adjustmentAmount;
-                if ("raise".equals(adjustment)) {
-                    adjustmentAmount = -1;
-                } else if ("lower".equals(adjustment)) {
-                    adjustmentAmount = +1;
-                } else if ("suppress".equals(adjustment)) {
-                    adjustmentAmount = +100;
-                } else {
-                    throw new IllegalArgumentException("Illegal priority adjustment value: " + adjustment);
-                }
-
-                DetectorFactory factory = DetectorFactoryCollection.instance().getFactoryByClassName(adjustmentTarget);
-                if (factory == null) {
-                    factory = DetectorFactoryCollection.instance().getFactory(adjustmentTarget);
-                }
-                if (factory != null) {
-                    factory.setPriorityAdjustment(adjustmentAmount);
-                } else {
-                    //
-                    DetectorFactoryCollection i18n = DetectorFactoryCollection.instance();
-                    BugPattern pattern = i18n.lookupBugPattern(adjustmentTarget);
-                    if (pattern == null) {
-                        throw new IllegalArgumentException("Unknown detector or bug pattern: " + adjustmentTarget);
-                    }
-                    pattern.adjustPriority(adjustmentAmount);
-                }
-
-            }
+            Map<String, String> adjustPriorityMap = UserPreferences.parseAdjustPriorities(argument);
+            FindBugs2.configureAdjustPriority(adjustPriorityMap);
         } else if ("-bugCategories".equals(option)) {
             this.bugCategorySet = FindBugs.handleBugCategories(argument);
         } else if ("-onlyAnalyze".equals(option)) {

@@ -505,40 +505,46 @@ public class FindBugs2 implements IFindBugsEngine, AutoCloseable {
         // setAnalysisFeatureSettings(userPreferences.getAnalysisFeatureSettings());
 
         configureFilters(userPreferences);
-        configureAdjustPriority(userPreferences);
+        if (userPreferences.getAdjustPriority() != null) {
+            configureAdjustPriority(userPreferences.getAdjustPriority());
+        }
     }
 
-    private void configureAdjustPriority(UserPreferences userPreferences) {
-        if (userPreferences.getAdjustPriority() != null) {
-            for (Map.Entry<String, String> entry : userPreferences.getAdjustPriority().entrySet()) {
-                String adjustmentTarget = entry.getKey();
-                String adjustment = entry.getValue();
+    /**
+     * Adjusts priorities of detectors and bug patterns.
+     *
+     * @param priorityAdjustments
+     *            Map of detector / bug pattern -> priority change
+     */
+    public static void configureAdjustPriority(Map<String, String> priorityAdjustments) {
+        for (Map.Entry<String, String> entry : priorityAdjustments.entrySet()) {
+            String adjustmentTarget = entry.getKey();
+            String adjustment = entry.getValue();
 
-                int adjustmentAmount;
-                if ("raise".equals(adjustment)) {
-                    adjustmentAmount = -1;
-                } else if ("lower".equals(adjustment)) {
-                    adjustmentAmount = +1;
-                } else if ("suppress".equals(adjustment)) {
-                    adjustmentAmount = +100;
-                } else {
-                    throw new IllegalArgumentException("Illegal priority adjustment value: " + adjustment);
-                }
+            int adjustmentAmount;
+            if ("raise".equals(adjustment)) {
+                adjustmentAmount = -1;
+            } else if ("lower".equals(adjustment)) {
+                adjustmentAmount = +1;
+            } else if ("suppress".equals(adjustment)) {
+                adjustmentAmount = +100;
+            } else {
+                throw new IllegalArgumentException("Illegal priority adjustment value: " + adjustment);
+            }
 
-                DetectorFactory factory = DetectorFactoryCollection.instance().getFactoryByClassName(adjustmentTarget);
-                if (factory == null) {
-                    factory = DetectorFactoryCollection.instance().getFactory(adjustmentTarget);
+            DetectorFactory factory = DetectorFactoryCollection.instance().getFactoryByClassName(adjustmentTarget);
+            if (factory == null) {
+                factory = DetectorFactoryCollection.instance().getFactory(adjustmentTarget);
+            }
+            if (factory != null) {
+                factory.setPriorityAdjustment(adjustmentAmount);
+            } else {
+                DetectorFactoryCollection i18n = DetectorFactoryCollection.instance();
+                BugPattern pattern = i18n.lookupBugPattern(adjustmentTarget);
+                if (pattern == null) {
+                    throw new IllegalArgumentException("Unknown detector or bug pattern: " + adjustmentTarget);
                 }
-                if (factory != null) {
-                    factory.setPriorityAdjustment(adjustmentAmount);
-                } else {
-                    DetectorFactoryCollection i18n = DetectorFactoryCollection.instance();
-                    BugPattern pattern = i18n.lookupBugPattern(adjustmentTarget);
-                    if (pattern == null) {
-                        throw new IllegalArgumentException("Unknown detector or bug pattern: " + adjustmentTarget);
-                    }
-                    pattern.adjustPriority(adjustmentAmount);
-                }
+                pattern.adjustPriority(adjustmentAmount);
             }
         }
     }
